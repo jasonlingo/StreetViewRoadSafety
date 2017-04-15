@@ -1,0 +1,23 @@
+gmap:
+    apiKey: "your_google_api_key"
+    headings: [["N", 0], ["E", 90], ["S", 180], ["W", 270]]
+    streetImageMinYear: 2011
+    streetImageMaxYear: 2012
+gdrive:
+    clientId: "your_google_api_client_id"
+    clientSecretPath: "../config/your_google_api_client_secret.json"
+shapefile:
+    filePath: "../data/shapefile/Bangkok-shp/shape/roads.shp"
+    # data stored at this index in a shape file indicates the road type
+    shapeTypeIndex: 3
+    intersectoinPointFile: "../data/validIntersectionPoints_nonduplicate.data"
+    pointInfoFilename: "../data/point_info.data"
+intersection:
+    # The limitation on the angle of two segments to prevent intersection points from the same path
+    pathDegree: 30
+sampling:
+    sampleNum: 10
+    initImageNumber: 1
+    streetImageOutputFolder: "../data/sampling/street_views"
+    csvFilename: "../data/sampling/results.csv"
+    sampledPointsMapFilename: "../data/sampling/map"
