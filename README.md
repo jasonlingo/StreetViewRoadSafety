@@ -19,4 +19,5 @@ Use Google street view images to assist the research of road safety. Extract the
 
 ## Program requirements
 - Python Version: 2.7.9
-- You'll need to install some dependent packages. Also, You'll need to fill in the Google API information in **config/config.yaml**.
+- You'll need to install some dependent packages.
+- You'll need to fill in the Google API information in **config/config.yaml**.
