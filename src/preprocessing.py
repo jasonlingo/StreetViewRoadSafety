@@ -1,3 +1,10 @@
+"""
+This processEndPoints is used to extract end point of each road record in a shapefile.
+Those end points are not necessarily all intersection points.
+For more precise intersection points, please use "intersection.py".
+"""
+
+
 from shapefileUtil import ShapeFileParser
 from shapefileUtil import ShapeType
 from config import CONFIG
