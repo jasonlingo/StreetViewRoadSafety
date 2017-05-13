@@ -178,6 +178,9 @@ def findCandidatePathSeg(grids, unitLen, minLng, minLat, pathSeg):
 def findValidIntersections(intersections):
     Logger.printAndWrite("Checking valid intersections")
 
+    # TODO: remove this
+    # These parameter, start and delta, are a temporary fix for the bug in Google Street View metadata API.
+    # The query quota for the API is 25000/day, but it should be fixed now so that there is no limit on the query.
     start = 260000
     delta = 10000
     msg = "Starting record = %d" % start
