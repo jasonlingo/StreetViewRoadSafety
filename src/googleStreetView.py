@@ -48,16 +48,15 @@ class GoogleStreetView(object):
         return json.loads(response.text)
 
     @classmethod
-    def downloadStreetView(cls, params, imgPathAndFilename):
+    def getStreetViewLink(cls, params):
         """
-        Download street view image according to the given parameters and
-        store it to the given file path.
+        get
         :param params: (tuple) lat, lng, heading, pov
-        :param outputName: (str) the output path and file name
+        :param outputName: The link to the street view
         """
         cls.timeToPause()
         requestUrl = cls.STREET_IMAGE_API % params
-        urllib.urlretrieve(requestUrl, imgPathAndFilename)
+        return requestUrl
 
     @classmethod
     def timeToPause(cls):

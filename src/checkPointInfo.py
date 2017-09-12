@@ -17,6 +17,8 @@ def getPointInfo(startNum, batchSize):
     """
     # TODO: modify it to do the batch processing automatically so that data will not be loaded for many times.
     points = readPoints(CONFIG["shapefile"]["intersectoinPointFile"])
+    print "Total points: %d" % len(points)
+
     outputFilename = CONFIG["shapefile"]["pointInfoFilename"]
     print "start=%d, delta=%d" % (startNum, batchSize)
     getPointInfoToFile(points[startNum:startNum + batchSize], outputFilename)
@@ -132,6 +134,6 @@ def check():
 
 
 if __name__ == "__main__":
-    startPoint = 0
-    batchSize = 5000
+    startPoint = 30000
+    batchSize = 10000
     getPointInfo(startPoint, batchSize)
