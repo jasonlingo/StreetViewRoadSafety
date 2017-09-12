@@ -1,5 +1,5 @@
 # Street View Road Safety
-Use Google street view images to assist the research of road safety. Extract the coordinates of intersections of a city and use them to retrieve street view images from the Google map API. For each interaction, get the multiple images that cover the 360 degree view at the center of the intersection. 
+Use Google street view images to assist the research of road safety. Extract the coordinates of intersections of a city and use them to retrieve links for street view images from the Google map API. For each interaction, get the multiple images that cover the 360 degree view at the center of the intersection. 
 
 ### Pre-processing
 - parse shapefiles and determine intersection points: **intersection.py**
