@@ -2,11 +2,9 @@ import random
 from config import CONFIG
 from csv_utils import outputCSV
 from util import readPointFile
-from util import makeDirectory
 from util import Progress
 from util import plotSampledPointMap
 from googleStreetView import GoogleStreetView
-from googleDrive import GDriveUpload
 
 
 def sampling():
@@ -14,9 +12,6 @@ def sampling():
     The main function of the sampling process.
     :return:
     """
-    # make directory for street images
-    streetImageOutputFolder = CONFIG["sampling"]["streetImageOutputFolder"]
-    makeDirectory(streetImageOutputFolder)
 
     # Get preprocessed point data
     intersectionPointFile = CONFIG["shapefile"]["intersectoinPointFile"]
@@ -30,21 +25,15 @@ def sampling():
     minYear = CONFIG["gmap"]["streetImageMinYear"]
     filteredPoints = filterPointByYear(pointInfo, maxYear, minYear)
 
-    IMG_NAME_COL_NUM = 5
     LAT_LNG_COL_NUM = 2
 
     # Sample street images, the return is list of sample info
     sampleNum = CONFIG["sampling"]["sampleNum"]
     initImageNumber = CONFIG["sampling"]["initImageNumber"]
-    sampleData = sampleAndDownloadStreetImage(filteredPoints, sampleNum, initImageNumber, initImageNumber, streetImageOutputFolder, intersectionPointInfo)
-    imageNames = [streetImageOutputFolder + "/" + data[IMG_NAME_COL_NUM] for data in sampleData]
-    links = GDriveUpload(imageNames, "Sampled_Image")
+    sampleData = sampleAndGetStreetImageLinks(filteredPoints, sampleNum, initImageNumber, initImageNumber, intersectionPointInfo)
 
-    for i in xrange(len(sampleData)):
-        imageName = streetImageOutputFolder + "/" + sampleData[i][IMG_NAME_COL_NUM]
-        sampleData[i].append(links[imageName])
-
-    columnTitle = ["Sample Number", "Sampled Point Number", "Latitude + Longitude", "Heading", "Date", "Image Name", "Road Types", "Web Link"]
+    # add field titles
+    columnTitle = ["Sample Number", "Sampled Point Number", "Latitude and Longitude", "Heading", "Date", "Image Name", "Road Types", "Web Link"]
     sampleData.insert(0, columnTitle)
 
     # output to csv file
@@ -63,22 +52,24 @@ def getValidEndPointFromFile(roadTypes):
     return validEndPoints
 
 
-def sampleAndDownloadStreetImage(endPoints, sampleNum, picNum, ptrNum, targetDirectory, intersectionPointInfo):
+def sampleAndGetStreetImageLinks(endPoints, sampleNum, picNum, ptrNum, intersectionPointInfo):
     """
     Randomly select end points from the endPoint collection.
     For each selected end point, call Google map street view image api
     to get the street view images.
     :return:
     """
-    print "downloading street images..."
-    sampledPoints = random.sample(endPoints, sampleNum) if sampleNum < len(endPoints) else endPoints
-    sampleData = []  # store (picture number, file name, lat and lng)
+    print "sampling street images..."
+
+    # get 2x sampled points for skipping some images that are missing its date
+    sampledPoints = random.sample(endPoints, sampleNum) if sampleNum < len(endPoints) * 2 else endPoints
+    sampleData = []  # store (picture number, file name, lat and lng, link to image)
     progress = Progress(10)
     headings = CONFIG["gmap"]["headings"]
     sampleNumDelta = len(headings)
     for point in sampledPoints:
         progress.printProgress()
-        result = downloadSurroundingStreetView(point, targetDirectory, picNum, ptrNum, intersectionPointInfo)
+        result = getSurroundingStreetViewLinks(point, picNum, ptrNum, intersectionPointInfo)
         sampleData += result
         picNum += sampleNumDelta
         ptrNum += 1
@@ -86,31 +77,43 @@ def sampleAndDownloadStreetImage(endPoints, sampleNum, picNum, ptrNum, targetDir
     return sampleData
 
 
-def downloadSurroundingStreetView(point, directory, picNum, ptrNum, intersectionPointInfo):
+def getSurroundingStreetViewLinks(point, picNum, ptrNum, intersectionPointInfo):
     """
-    Call Google street view image api to get the four surrounding images at the
+    Call Google street view image api to get the links for the four surrounding images at the
     given point.
     :param point: (float, float) longitude and latitude
     :param directory: the directory for saving the images
     """
     result = []
     for heading in CONFIG["gmap"]["headings"]:
-        filename = "%s/%010d_%s_%s_%s.jpg" % (directory, picNum, str(point[1]), str(point[0]), heading[0])
-        paramDict = GoogleStreetView.makeParameterDict(point[1], point[0], heading[1])
-        metadata = GoogleStreetView.getMetadata(paramDict)
+        try:
+            filename = "%010d_%s_%s_%s.jpg" % (picNum, str(point[1]), str(point[0]), heading[0])
+            paramDict = GoogleStreetView.makeParameterDict(point[1], point[0], heading[1])
+            metadata = GoogleStreetView.getMetadata(paramDict)
 
-        result.append([picNum,
-                       ptrNum,
-                       str(point[1]) + "," + str(point[0]),
-                       heading[0],
-                       metadata["date"],
-                       filename.split("/")[-1],
-                       ",".join(intersectionPointInfo[(point[0], point[1])])]
-                      )
+            param = GoogleStreetView.makeParameter(point[1], point[0], heading[1])
+            imageLink = GoogleStreetView.getStreetViewLink(param)
 
-        param = GoogleStreetView.makeParameter(point[1], point[0], heading[1])
-        GoogleStreetView.downloadStreetView(param, filename)
-        picNum += 1
+            if "date" in metadata:
+                date = metadata["date"]
+            else:
+                date = "Unknown"
+                print filename + " has now date"
+
+            result.append([
+                picNum,
+                ptrNum,
+                str(point[1]) + "," + str(point[0]),
+                heading[0],
+                date,
+                filename,
+                ",".join(intersectionPointInfo[(point[0], point[1])]),
+                imageLink
+            ])
+            picNum += 1
+        except:
+            print metadata
+            break
     return result
 
 

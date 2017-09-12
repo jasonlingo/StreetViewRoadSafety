@@ -168,9 +168,8 @@ class Progress(object):
 
     def printProgress(self):
         self.count += 1
-        if self.count == self.freq:
-            self.count = 0
-            print ".",
+        if self.count % self.freq == 0:
+            print "\r%d" % self.count
 
 
 def haversine(point1, point2):
