@@ -35,10 +35,7 @@ class PathSegment(object):
     @classmethod
     def isValidAngle(cls, segment1, segment2):
         angle = calcVectAngle(segment1, segment2)
-        if smallAngle(angle):
-            return False
-        else:
-            return True
+        return not isSmallAngle(angle)
 
     @classmethod
     def isValidIntersectionPoint(cls, intersectionPoint, line1, line2):
@@ -82,7 +79,7 @@ LIMIT_ANGLE2 = 360 - PATH_DEGREE
 LIMIT_ANGLE3 = 180 - PATH_DEGREE
 LIMIT_ANGLE4 = 180 + PATH_DEGREE
 
-def smallAngle(angle):
+def isSmallAngle(angle):
     return angle <= LIMIT_ANGLE1 or angle >= LIMIT_ANGLE2 or (LIMIT_ANGLE3 <= angle <= LIMIT_ANGLE4)
 
 def nearbyPoints(mainPoint, points, dist):
